@@ -5,29 +5,16 @@ import { computed, ref, watch } from 'vue';
 
 const { props } = usePage();
 const cars = ref(props.cars);
-const form = useForm({});
+const form = useForm({
+    search: '',
+});
 
-const search = ref('');
 
 
-let carsUrl = computed(() => {
-    let url = new URL(route('cars.index'))
 
-    if (search.value) {
-        url.searchParams.append("search", search.value)
-
-        return url
-    }
-})
-
-watch(() => {
-    carsUrl.value, (newCarUrl) => {
-        router.visit(newCarUrl, {
-            preserveScroll: true,
-            preserveState: true,
-        })
-    }
-})
+const handleFilter = () => {
+    form.get(route('cars.index'));
+};
 
 
 
@@ -36,7 +23,7 @@ const deleteCar = (carId) => {
     if (confirm('Apakah Anda yakin ingin menghapus mobil ini?')) {
         form.delete(route('cars.destroy', carId), {
             onSuccess: () => {
-                // Hapus mobil dari data lokal
+
                 cars.value = cars.value.filter(car => car.id !== carId);
             },
             onError: (errors) => {
@@ -60,7 +47,22 @@ const deleteCar = (carId) => {
                     Mobil
                 </h2>
 
-                <input v-model="search" @input="fetchCars" type="text" placeholder="Cari..." class="input-class" />
+                <form @submit.prevent="handleFilter" class="flex items-center max-w-sm mr-4">
+                    <label for="simple-search" class="sr-only">Search</label>
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <fa :icon="['fas', 'magnifying-glass']" style="color: #B197FC;" />
+                        </div>
+                        <input type="text" v-model="form.search" id="simple-search"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-sky-500 focus:border-sky-500 block w-full ps-10 p-2.5 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-sky-500 dark:focus:border-sky-500"
+                            placeholder="Search name..." />
+                    </div>
+                    <button type="submit"
+                        class="py-2 px-3 ms-2 text-sm font-medium text-white bg-sky-800 rounded-lg hover:bg-sky-700 focus:ring-4 focus:outline-none focus:ring-sky-300 dark:bg-sky-600 dark:hover:bg-sky-700 dark:focus:ring-sky-800">
+                        <fa :icon="['fas', 'magnifying-glass']" />
+                        Cari
+                    </button>
+                </form>
                 <Link :href="route('cars.create')"
                     class="rounded-lg border border-blue-900  py-1 px-2 md:py-2 md:px-6 mr-2 font-semibold text-gray-800 hover:bg-blue-600">
                 Tambah Mobil
@@ -127,8 +129,10 @@ const deleteCar = (carId) => {
                                 class="py-2 px-4 bg-red-600 text-white font-bold rounded-lg text-sm sm:text-base hover:bg-red-700 transition-colors">
                                 Delete
                             </button>
-                            <Link :href="route('rentals.create', car.id)"
-                                class="py-2 px-4 bg-green-700 text-white font-bold rounded-lg text-sm sm:text-base hover:bg-green-800 transition-colors">
+                            <Link :href="route('rentals.create', car.id)" :disabled="car.is_available === 0"
+                                class="py-2 px-4 bg-green-500 text-white font-bold rounded-lg text-sm sm:text-base transition-colors"
+                                :class="{ 'hover:bg-green-700': car.is_available === 1, 'opacity-50 cursor-not-allowed': car.is_available == 0 }">
+
                             Sewa
                             </Link>
                         </div>

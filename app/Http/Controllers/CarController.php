@@ -13,7 +13,7 @@ class CarController extends Controller
     // Halaman daftar mobil
     public function index(Request $request)
     {
-        $cars = Car::filter($request)->get(); // Menggunakan pagination
+        $cars = Car::with('rentals')->filter($request)->get(); // Menggunakan pagination
 
 
         return Inertia::render('Cars/Index', [
