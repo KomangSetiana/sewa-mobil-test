@@ -21,9 +21,4 @@ class Car extends Model
             });
         });
     }
-
-    public function rentals()
-    {
-        return $this->hasOne(Rental::class);
-    }
 }
